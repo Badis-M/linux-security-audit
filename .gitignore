@@ -1,0 +1,6 @@
+.DS_Store
+context.md
+coverage/
+reports/
+*.log
+*.tmp
