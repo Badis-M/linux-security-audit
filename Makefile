@@ -1,6 +1,9 @@
 SHELL := /usr/bin/env bash
 
-.PHONY: help
+.PHONY: help test
 
 help:
-	@echo "Available targets will be added as the project is implemented."
+	@echo "Available targets: test"
+
+test:
+	bats tests
