@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIRECTORY/.." && pwd)"
+
+# shellcheck source=../lib/common.sh
+source "$PROJECT_ROOT/lib/common.sh"
+# shellcheck source=../lib/cli.sh
+source "$PROJECT_ROOT/lib/cli.sh"
+# shellcheck source=../lib/findings.sh
+source "$PROJECT_ROOT/lib/findings.sh"
+# shellcheck source=../lib/output.sh
+source "$PROJECT_ROOT/lib/output.sh"
+# shellcheck source=../lib/audit.sh
+source "$PROJECT_ROOT/lib/audit.sh"
+
+for check_module in "$PROJECT_ROOT"/lib/checks/*.sh; do
+  [[ -r "$check_module" ]] || continue
+  # Check modules are controlled application files, not user input.
+  source "$check_module"
+done
+
+main() {
+  local parse_status audit_status
+  if parse_cli "$@"; then
+    parse_status=0
+  else
+    parse_status=$?
+  fi
+  if (( parse_status != 0 )); then
+    printf 'error: %s\n\n' "$CLI_ERROR" >&2
+    print_usage >&2
+    return "$parse_status"
+  fi
+
+  if (( CLI_SHOW_HELP == 1 )); then
+    print_usage
+    return 0
+  fi
+
+  case "$CLI_COMMAND" in
+    version)
+      printf 'linux-security-audit %s\n' "$LSA_VERSION"
+      ;;
+    list-checks)
+      print_check_list
+      ;;
+    audit)
+      if ! validate_check_selection; then
+        printf 'error: %s\n' "$CLI_ERROR" >&2
+        return 3
+      fi
+      run_audit
+      audit_status="$(finding_exit_code)"
+      case "$CLI_FORMAT" in
+        text) emit_report render_text_report || return 3 ;;
+        json)
+          printf 'error: JSON output is not available in this build\n' >&2
+          return 3
+          ;;
+      esac
+      return "$audit_status"
+      ;;
+  esac
+}
+
+main "$@"
