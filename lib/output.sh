@@ -105,10 +105,16 @@ validate_output_path() {
   local output_path="$1"
   local output_directory
 
-  if [[ -z "$output_path" || "$output_path" == */ ]]; then
+  if [[ -z "$output_path" || "$output_path" == "-" || "$output_path" == */ ]]; then
     printf 'error: invalid output path\n' >&2
     return 3
   fi
+  case "$output_path" in
+    *$'\n'*|*$'\r'*|*$'\t'*)
+      printf 'error: output path contains control characters\n' >&2
+      return 3
+      ;;
+  esac
   if [[ -L "$output_path" ]]; then
     printf 'error: output path must not be a symbolic link: %s\n' "$output_path" >&2
     return 3
@@ -121,6 +127,12 @@ validate_output_path() {
   if [[ ! -d "$output_directory" || ! -w "$output_directory" ]]; then
     printf 'error: output directory is not writable: %s\n' "$output_directory" >&2
     return 3
+  fi
+}
+
+cleanup_report_file() {
+  if [[ -n "${REPORT_TEMPORARY_FILE:-}" && -e "$REPORT_TEMPORARY_FILE" ]]; then
+    rm -f -- "$REPORT_TEMPORARY_FILE"
   fi
 }
 
@@ -138,16 +150,25 @@ emit_report() {
     printf 'error: could not create a temporary report file\n' >&2
     return 3
   fi
+  REPORT_TEMPORARY_FILE="$temporary_file"
+  trap 'cleanup_report_file' EXIT
+  trap 'cleanup_report_file; exit 130' HUP INT TERM
   chmod 600 "$temporary_file"
 
   if ! "$renderer" > "$temporary_file"; then
-    rm -f -- "$temporary_file"
+    cleanup_report_file
+    REPORT_TEMPORARY_FILE=""
+    trap - EXIT HUP INT TERM
     printf 'error: could not render report\n' >&2
     return 3
   fi
   if ! mv -f -- "$temporary_file" "$CLI_OUTPUT"; then
-    rm -f -- "$temporary_file"
+    cleanup_report_file
+    REPORT_TEMPORARY_FILE=""
+    trap - EXIT HUP INT TERM
     printf 'error: could not write report: %s\n' "$CLI_OUTPUT" >&2
     return 3
   fi
+  REPORT_TEMPORARY_FILE=""
+  trap - EXIT HUP INT TERM
 }
