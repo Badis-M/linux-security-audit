@@ -16,6 +16,18 @@ severity_color() {
   esac
 }
 
+json_escape() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\b'/\\b}"
+  value="${value//$'\f'/\\f}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '%s' "$value"
+}
+
 render_text_report() {
   local use_color=0
   if (( CLI_NO_COLOR == 0 )) && [[ -t 1 ]]; then
@@ -54,6 +66,39 @@ render_text_report() {
   if (( visible_count == 0 )); then
     printf 'No findings match the selected severity threshold.\n'
   fi
+}
+
+render_json_report() {
+  printf '{\n'
+  printf '  "version": "%s",\n' "$(json_escape "$LSA_VERSION")"
+  printf '  "summary": {"info": %s, "warning": %s, "critical": %s},\n' \
+    "$(count_findings_by_severity info)" \
+    "$(count_findings_by_severity warning)" \
+    "$(count_findings_by_severity critical)"
+  printf '  "findings": ['
+
+  local index severity emitted=0
+  for ((index = 0; index < ${#FINDING_CHECKS[@]}; index += 1)); do
+    severity="${FINDING_SEVERITIES[$index]}"
+    severity_is_visible "$severity" "$CLI_MIN_SEVERITY" || continue
+    if (( emitted > 0 )); then
+      printf ','
+    fi
+    printf '\n    {'
+    printf '"check": "%s", ' "$(json_escape "${FINDING_CHECKS[$index]}")"
+    printf '"severity": "%s", ' "$(json_escape "$severity")"
+    printf '"title": "%s", ' "$(json_escape "${FINDING_TITLES[$index]}")"
+    printf '"message": "%s", ' "$(json_escape "${FINDING_MESSAGES[$index]}")"
+    printf '"recommendation": "%s"' "$(json_escape "${FINDING_RECOMMENDATIONS[$index]}")"
+    printf '}'
+    ((emitted += 1))
+  done
+
+  if (( emitted > 0 )); then
+    printf '\n  '
+  fi
+  printf ']\n'
+  printf '}\n'
 }
 
 validate_output_path() {

@@ -58,10 +58,7 @@ main() {
       audit_status="$(finding_exit_code)"
       case "$CLI_FORMAT" in
         text) emit_report render_text_report || return 3 ;;
-        json)
-          printf 'error: JSON output is not available in this build\n' >&2
-          return 3
-          ;;
+        json) emit_report render_json_report || return 3 ;;
       esac
       return "$audit_status"
       ;;
