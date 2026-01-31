@@ -55,3 +55,24 @@ setup() {
 
   [ "$status" -eq 3 ]
 }
+
+@test "renders valid deterministic JSON" {
+  add_finding system info 'Quoted "title"' 'Path C:\safe' "Review it."
+  add_finding ssh warning "Password authentication" "Password login is enabled."
+
+  first="$(render_json_report)"
+  second="$(render_json_report)"
+
+  [ "$first" = "$second" ]
+  JSON_REPORT="$first" python3 -c 'import json, os; data=json.loads(os.environ["JSON_REPORT"]); assert data["summary"]["warning"] == 1; assert len(data["findings"]) == 2'
+}
+
+@test "applies severity filtering to JSON findings" {
+  add_finding system info "System" "Detected."
+  add_finding ssh critical "Root login" "Enabled."
+  CLI_MIN_SEVERITY="critical"
+
+  report="$(render_json_report)"
+
+  JSON_REPORT="$report" python3 -c 'import json, os; data=json.loads(os.environ["JSON_REPORT"]); assert data["summary"]["info"] == 1; assert len(data["findings"]) == 1; assert data["findings"][0]["severity"] == "critical"'
+}
