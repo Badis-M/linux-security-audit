@@ -6,14 +6,17 @@ setup() {
 
 @test "detects available commands" {
   command_exists bash
-  ! command_exists command-that-must-not-exist-lsa
+  run command_exists command-that-must-not-exist-lsa
+  [ "$status" -ne 0 ]
 }
 
 @test "validates unsigned integers" {
   is_unsigned_integer 0
   is_unsigned_integer 42
-  ! is_unsigned_integer -1
-  ! is_unsigned_integer 1.5
+  run is_unsigned_integer -1
+  [ "$status" -ne 0 ]
+  run is_unsigned_integer 1.5
+  [ "$status" -ne 0 ]
 }
 
 @test "sanitizes line breaks and tabs" {
@@ -24,7 +27,8 @@ setup() {
 
 @test "finds exact array members" {
   array_contains ssh system ssh network
-  ! array_contains fire system ssh network
+  run array_contains fire system ssh network
+  [ "$status" -ne 0 ]
 }
 
 @test "joins values without a trailing separator" {

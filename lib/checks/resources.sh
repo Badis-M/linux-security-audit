@@ -20,10 +20,10 @@ add_usage_finding() {
 report_filesystem_usage() {
   local filesystem_output="$1"
   local metric="$2"
-  local filesystem total used available capacity mount_point
+  local _filesystem _total _used _available capacity mount_point
   local line_number=0 reported=0 percentage title_prefix
 
-  while read -r filesystem total used available capacity mount_point; do
+  while read -r _filesystem _total _used _available capacity mount_point; do
     ((line_number += 1))
     (( line_number == 1 )) && continue
     [[ -n "$capacity" && -n "$mount_point" ]] || continue

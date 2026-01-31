@@ -45,5 +45,6 @@ setup() {
 @test "filters severities by minimum rank" {
   severity_is_visible warning info
   severity_is_visible warning warning
-  ! severity_is_visible warning critical
+  run severity_is_visible warning critical
+  [ "$status" -ne 0 ]
 }

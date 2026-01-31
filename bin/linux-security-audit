@@ -22,6 +22,7 @@ source "$PROJECT_ROOT/lib/audit.sh"
 for check_module in "$PROJECT_ROOT"/lib/checks/*.sh; do
   [[ -r "$check_module" ]] || continue
   # Check modules are controlled application files, not user input.
+  # shellcheck disable=SC1090
   source "$check_module"
 done
 

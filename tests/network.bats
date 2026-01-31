@@ -11,7 +11,8 @@ setup() {
   socket_is_wildcard "0.0.0.0:22"
   socket_is_wildcard "[::]:443"
   socket_is_wildcard ":::8080"
-  ! socket_is_wildcard "127.0.0.1:5432"
+  run socket_is_wildcard "127.0.0.1:5432"
+  [ "$status" -ne 0 ]
 }
 
 @test "classifies wildcard sockets without calling them vulnerabilities" {

@@ -9,10 +9,10 @@ socket_is_wildcard() {
 
 report_listening_sockets() {
   local socket_output="$1"
-  local protocol state receive_queue send_queue local_address peer_address
+  local protocol _state _receive_queue _send_queue local_address _peer_address
   local socket_count=0
 
-  while read -r protocol state receive_queue send_queue local_address peer_address _; do
+  while read -r protocol _state _receive_queue _send_queue local_address _peer_address _; do
     [[ -n "$protocol" && -n "$local_address" ]] || continue
     ((socket_count += 1))
     if socket_is_wildcard "$local_address"; then

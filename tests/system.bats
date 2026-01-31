@@ -18,7 +18,8 @@ setup() {
   [ "$(finding_count)" -eq 4 ]
   [ "${FINDING_MESSAGES[0]}" = "Detected Example Linux 1." ]
   [ "${FINDING_MESSAGES[2]}" = "The host has been running for 2d 3h 4m." ]
-  [[ "${FINDING_MESSAGES[*]}" != *"$USER"* ]]
+  [[ "${FINDING_MESSAGES[*]}" != *"$(hostname)"* ]]
+  [[ "${FINDING_MESSAGES[*]}" != *"$(id -un)"* ]]
 }
 
 @test "reports missing inventory sources as information" {

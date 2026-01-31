@@ -17,7 +17,8 @@ setup() {
 
   distribution_is_debian_family "$ubuntu"
   distribution_is_debian_family "$derivative"
-  ! distribution_is_debian_family "$other"
+  run distribution_is_debian_family "$other"
+  [ "$status" -ne 0 ]
 }
 
 @test "counts cached package updates without package names" {

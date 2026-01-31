@@ -5,7 +5,11 @@ setup() {
 }
 
 @test "requires a command" {
-  run parse_cli
+  if parse_cli; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "A command is required." ]
@@ -39,42 +43,66 @@ setup() {
 }
 
 @test "rejects an unknown command" {
-  run parse_cli scan
+  if parse_cli scan; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Unknown command: scan" ]
 }
 
 @test "rejects an unknown option" {
-  run parse_cli audit --unsafe
+  if parse_cli audit --unsafe; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Unknown option: --unsafe" ]
 }
 
 @test "rejects unsupported formats" {
-  run parse_cli audit --format yaml
+  if parse_cli audit --format yaml; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Unsupported format: yaml" ]
 }
 
 @test "rejects unsupported severities" {
-  run parse_cli audit --severity emergency
+  if parse_cli audit --severity emergency; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Unsupported severity: emergency" ]
 }
 
 @test "rejects a missing option value" {
-  run parse_cli audit --output
+  if parse_cli audit --output; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Missing value for --output." ]
 }
 
 @test "rejects options for version" {
-  run parse_cli version --verbose
+  if parse_cli version --verbose; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "The version command does not accept options." ]

@@ -17,7 +17,11 @@ setup() {
 @test "rejects unknown checks" {
   CLI_ONLY_CHECKS=(unknown)
 
-  run validate_check_selection
+  if validate_check_selection; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
   [ "$CLI_ERROR" = "Unknown check: unknown" ]
@@ -27,7 +31,11 @@ setup() {
   CLI_ONLY_CHECKS=(ssh)
   CLI_EXCLUDED_CHECKS=(ssh)
 
-  run validate_check_selection
+  if validate_check_selection; then
+    false
+  else
+    status=$?
+  fi
 
   [ "$status" -eq 3 ]
 }
