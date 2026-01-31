@@ -56,6 +56,12 @@ setup() {
   [ "$status" -eq 3 ]
 }
 
+@test "rejects control characters in output paths" {
+  run validate_output_path $'report\nname.json'
+
+  [ "$status" -eq 3 ]
+}
+
 @test "renders valid deterministic JSON" {
   add_finding system info 'Quoted "title"' 'Path C:\safe' "Review it."
   add_finding ssh warning "Password authentication" "Password login is enabled."
