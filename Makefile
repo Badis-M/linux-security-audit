@@ -20,5 +20,6 @@ smoke:
 	bin/linux-security-audit version
 	bin/linux-security-audit list-checks >/dev/null
 	bin/linux-security-audit audit --check system --format json --no-color >/dev/null
+	@status=0; bin/linux-security-audit audit --format json --no-color >/dev/null || status=$$?; test $$status -le 2
 
 ci: syntax lint test smoke

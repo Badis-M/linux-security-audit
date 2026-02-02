@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "summary": {"info": 2, "warning": 1, "critical": 0},
+  "findings": [
+    {"check": "system", "severity": "info", "title": "Operating system", "message": "Detected Example Linux 1.0.", "recommendation": ""},
+    {"check": "system", "severity": "info", "title": "Kernel", "message": "Kernel 6.8.0-example on x86_64 architecture.", "recommendation": ""},
+    {"check": "network", "severity": "warning", "title": "Wildcard listening socket", "message": "tcp is listening on 0.0.0.0:22, which accepts connections on any local interface.", "recommendation": "Confirm that the service requires network-wide exposure and restrict it when possible."}
+  ]
+}
