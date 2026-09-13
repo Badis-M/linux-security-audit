@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Ignore systemctl summary lines when parsing failed units and disable the
+  pager explicitly during service audits.
+
 ## [1.0.0] - 2026-02-02
 
 ### Added

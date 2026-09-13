@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 
+systemd_unit_name_is_valid() {
+  case "$1" in
+    *.automount|*.device|*.mount|*.path|*.scope|*.service|*.slice|*.socket|*.swap|*.target|*.timer)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 report_failed_units() {
   local systemctl_output="$1"
   local line unit
@@ -7,11 +18,16 @@ report_failed_units() {
 
   while IFS= read -r line; do
     [[ -n "$line" ]] || continue
+    while [[ "$line" == [[:space:]]* ]]; do
+      line="${line#?}"
+    done
+    [[ -n "$line" ]] || continue
     if [[ "$line" == "● "* ]]; then
       line="${line#● }"
     fi
     read -r unit _ <<< "$line"
-    [[ -n "$unit" ]] && failed_units+=("$(sanitize_text "$unit")")
+    systemd_unit_name_is_valid "$unit" || continue
+    failed_units+=("$(sanitize_text "$unit")")
   done <<< "$systemctl_output"
 
   if (( ${#failed_units[@]} == 0 )); then
@@ -34,7 +50,7 @@ run_services_check() {
     return 0
   fi
 
-  if capture_command systemctl --failed --no-legend --plain; then
+  if capture_command systemctl --failed --no-legend --no-pager --plain; then
     report_failed_units "$COMMAND_OUTPUT"
   else
     add_finding services info "Service status unavailable" \
