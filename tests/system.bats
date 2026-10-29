@@ -4,8 +4,8 @@ setup() {
   source "$BATS_TEST_DIRNAME/../lib/common.sh"
   source "$BATS_TEST_DIRNAME/../lib/findings.sh"
   source "$BATS_TEST_DIRNAME/../lib/checks/system.sh"
-  # Called indirectly by the sourced collector.
-  # shellcheck disable=SC2329
+  # Called indirectly by the sourced collector; diagnostic IDs vary by ShellCheck version.
+  # shellcheck disable=SC2317,SC2329
   uname() { printf 'fixture\n'; }
   reset_findings
   LSA_ROOT_DIR="$BATS_TEST_TMPDIR/root"

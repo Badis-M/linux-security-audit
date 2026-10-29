@@ -1,7 +1,7 @@
 # Linux Security Audit — guide de travail des agents
 
 État documentaire : 2026-10-29. Version préparée : `1.0.1`, non publiée.
-Référence de départ de cette itération : `1c0874192bf7fd1ba4d0840bb07a7fbc9e289b14` ; les changements de cette itération sont encore locaux et non commités lors de la rédaction.
+Référence du suivi CI : `ace51a25c8cbe9083613f61c6f0e4309f8258c18`. La préparation précédente a été commitée et poussée par l’utilisateur ; les correctifs CI décrits ci-dessous restent locaux et non commités.
 
 ## Reprendre le contexte
 
@@ -34,3 +34,9 @@ Les fixtures et commandes simulées doivent isoler les tests. `make smoke` utili
 Le rendu JSON traite les caractères de contrôle et le collecteur firewalld conserve un état inaccessible comme inconnu. Les délais des commandes externes et la couverture de véritables environnements systemd restent des améliorations séparées.
 
 Contrôle de développement : `make ci build` avec Bats, ShellCheck et Python 3. Le runtime reste Bash et les outils Linux documentés. Conserver `bin/` et `lib/` ensemble dans la distribution.
+
+## Suivi CI — 2026-10-29
+
+Les deux jobs de validation Ubuntu/Debian ont échoué au lint : leurs ShellCheck 0.9.0/0.10.0 émettent SC2317 pour les fonctions simulées appelées indirectement. Le job package a été ignoré après ces échecs.
+
+Les annotations ciblées des seules fonctions simulées couvrent maintenant SC2317 et SC2329. Aucun contrôle ShellCheck n’a été désactivé globalement et le code runtime n’a pas été changé. Voir `docs/VALIDATION.md` pour la preuve distante et les vérifications locales. Une nouvelle CI après push doit confirmer le correctif ; aucune publication n’est autorisée implicitement.

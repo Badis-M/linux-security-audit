@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Support both ShellCheck callback diagnostic IDs only on the indirectly invoked Bats stubs.
+
 ## [1.0.1] - 2026-10-29
 
 ### Fixed
