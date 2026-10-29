@@ -34,3 +34,38 @@ setup() {
   [ "${FINDING_SEVERITIES[0]}" = "warning" ]
   [ "${FINDING_TITLES[0]}" = "Firewall tooling unavailable" ]
 }
+
+
+@test "collects inaccessible firewalld as unknown instead of inactive" {
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  command_exists() { [[ "$1" == "firewall-cmd" ]]; }
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  capture_command() { COMMAND_OUTPUT=""; COMMAND_STATUS=1; return 1; }
+  run_firewall_check
+  [ "${FINDING_TITLES[0]}" = "Firewall status unknown" ]
+  [ "${FINDING_SEVERITIES[0]}" = "info" ]
+}
+
+@test "recognizes explicit stopped firewalld" {
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  command_exists() { [[ "$1" == "firewall-cmd" ]]; }
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  capture_command() { COMMAND_OUTPUT="not running"; COMMAND_STATUS=252; return 252; }
+  run_firewall_check
+  [ "${FINDING_TITLES[0]}" = "Firewall inactive" ]
+}
+
+@test "does not infer inactivity from unexpected successful firewalld output" {
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  command_exists() { [[ "$1" == "firewall-cmd" ]]; }
+  # Called indirectly by the sourced collector.
+  # shellcheck disable=SC2329
+  capture_command() { COMMAND_OUTPUT="unexpected"; COMMAND_STATUS=0; return 0; }
+  run_firewall_check
+  [ "${FINDING_TITLES[0]}" = "Firewall status unknown" ]
+}

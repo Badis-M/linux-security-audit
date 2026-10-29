@@ -37,3 +37,9 @@ system metadata, but does not enable remediation behavior.
 
 The checks use operational heuristics. A warning is not proof of a
 vulnerability, and a clean report is not evidence of formal compliance.
+
+## Output control characters and visibility
+
+Representable ASCII controls are escaped in JSON; finding text normalizes control characters so host strings do not inject raw terminal escape sequences. NUL cannot be represented in a Bash variable. An unreadable or unexpected firewalld response is unknown, not proof of an inactive firewall. Only its explicit stopped response is classified as inactive.
+
+Development smoke tests use a synthetic root and a fake `uname`. The CI installs validation dependencies only inside disposable containers. See `RELEASE.md` for distribution contents and publication conditions.

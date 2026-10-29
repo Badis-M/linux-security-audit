@@ -4,3 +4,10 @@ coverage/
 reports/
 *.log
 *.tmp
+
+# Local French project guide; never stage this file.
+/contexte.md
+
+/dist/
+__pycache__/
+*.py[cod]

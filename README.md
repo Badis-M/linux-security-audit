@@ -137,7 +137,7 @@ Install Bats and ShellCheck, then run:
 make ci
 ```
 
-The target performs syntax validation, ShellCheck, 70 Bats tests, and smoke
+The target performs syntax validation, ShellCheck, 75 Bats tests, and smoke
 tests. GitHub Actions repeats the suite in Ubuntu 24.04 and Debian 13
 containers. The checkout action is pinned to an immutable commit SHA and the
 workflow token has read-only repository permissions.
@@ -161,3 +161,12 @@ decide how those findings appear. See [docs/architecture.md](docs/architecture.m
 ## License
 
 MIT © Badis Merakchi
+
+## Agent context, validation and delivery
+
+- Read [agent.md](agent.md) and the applicable repository instructions before making changes.
+- [docs/VALIDATION.md](docs/VALIDATION.md) records dated results and remaining limits.
+- [docs/RELEASE.md](docs/RELEASE.md) explains CI, artifact checks and explicitly authorized manual publication.
+- The French `contexte.md` guide is local and ignored by Git; it is intentionally absent from clones and distributions.
+
+A normal push to `main` runs CI but does not publish a release. Existing GitHub runs describe earlier commits and do not validate the current uncommitted changes.

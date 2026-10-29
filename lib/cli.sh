@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly LSA_VERSION="1.0.0"
+readonly LSA_VERSION="1.0.1"
 
 reset_cli_options() {
   CLI_COMMAND=""

@@ -51,10 +51,12 @@ run_firewall_check() {
       if [[ "$COMMAND_OUTPUT" == "running" ]]; then
         active_tools+=("firewalld")
       else
-        inactive_tools+=("firewalld")
+        unknown_tools+=("firewalld")
       fi
-    else
+    elif [[ "$COMMAND_OUTPUT" == "not running" ]]; then
       inactive_tools+=("firewalld")
+    else
+      unknown_tools+=("firewalld")
     fi
   fi
 

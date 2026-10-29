@@ -13,6 +13,11 @@ sanitize_text() {
   value="${value//$'\r'/ }"
   value="${value//$'\n'/ }"
   value="${value//$'\t'/ }"
+  local code character
+  for ((code = 1; code < 32; code += 1)); do
+    printf -v character '%b' "\\$(printf '%03o' "$code")"
+    value="${value//"$character"/ }"
+  done
   printf '%s' "$value"
 }
 

@@ -2,13 +2,17 @@
 
 setup() {
   CLI="$BATS_TEST_DIRNAME/../bin/linux-security-audit"
+  mkdir -p "$BATS_TEST_TMPDIR/bin"
+  printf '#!/usr/bin/env bash\nprintf "fixture\\n"\n' > "$BATS_TEST_TMPDIR/bin/uname"
+  chmod 700 "$BATS_TEST_TMPDIR/bin/uname"
+  export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
 }
 
 @test "prints the version" {
   run "$CLI" version
 
   [ "$status" -eq 0 ]
-  [ "$output" = "linux-security-audit 1.0.0" ]
+  [ "$output" = "linux-security-audit 1.0.1" ]
 }
 
 @test "lists every documented check" {
@@ -57,5 +61,8 @@ setup() {
 
   [ "$status" -eq 0 ]
   [ -f "$report" ]
-  [ "$(stat -c '%a' "$report")" = "600" ]
+  python3 - "$report" <<'CHECK'
+import os, stat, sys
+assert stat.S_IMODE(os.stat(sys.argv[1]).st_mode) == 0o600
+CHECK
 }

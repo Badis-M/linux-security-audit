@@ -25,6 +25,12 @@ json_escape() {
   value="${value//$'\n'/\\n}"
   value="${value//$'\r'/\\r}"
   value="${value//$'\t'/\\t}"
+  local code character escaped
+  for ((code = 1; code < 32; code += 1)); do
+    printf -v character '%b' "\\$(printf '%03o' "$code")"
+    printf -v escaped '\\u%04x' "$code"
+    value="${value//"$character"/$escaped}"
+  done
   printf '%s' "$value"
 }
 

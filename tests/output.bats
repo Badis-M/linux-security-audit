@@ -82,3 +82,16 @@ setup() {
 
   JSON_REPORT="$report" python3 -c 'import json, os; data=json.loads(os.environ["JSON_REPORT"]); assert data["summary"]["info"] == 1; assert len(data["findings"]) == 1; assert data["findings"][0]["severity"] == "critical"'
 }
+
+
+@test "escapes every representable ASCII control character in JSON" {
+  value="$(python3 -c 'print("".join(chr(i) for i in range(1, 32)), end="")')"
+  escaped="$(json_escape "$value")"
+  JSON_VALUE="\"$escaped\"" python3 -c 'import json, os; assert json.loads(os.environ["JSON_VALUE"]) == "".join(chr(i) for i in range(1, 32))'
+}
+
+@test "normalizes terminal controls before rendering findings" {
+  add_finding resources info "Fixture" $'example\033[31m'
+  report="$(render_json_report)"
+  JSON_REPORT="$report" python3 -c 'import json, os; report=os.environ["JSON_REPORT"]; assert "\x1b" not in report; json.loads(report)'
+}

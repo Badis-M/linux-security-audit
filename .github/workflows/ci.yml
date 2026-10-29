@@ -1,36 +1,76 @@
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
-
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        default: ''
 permissions:
   contents: read
-
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   validate:
-    name: Validate on ${{ matrix.image }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         image:
-          - ubuntu:24.04
-          - debian:13-slim
+          - ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+          - debian:13-slim@sha256:f6b08b09a05725f9431502d3b5714f5c4576e82c1a84fa1debe0c24a7e0c3ec4
     container:
       image: ${{ matrix.image }}
     steps:
-      - name: Install test dependencies
+      - name: Install validation tools only inside this disposable container
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends bash bats ca-certificates git iproute2 make python3 shellcheck
-
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.ref || github.ref }}
           persist-credentials: false
-
-      - name: Validate
-        run: make ci
+      - run: make ci build
+      - name: Verify archive checksums and extracted CLI without a host audit
+        shell: bash
+        run: |
+          (cd dist && sha256sum --check SHA256SUMS)
+          mkdir -p /tmp/lsa-package
+          tar -xzf dist/*.tar.gz -C /tmp/lsa-package
+          package=$(find /tmp/lsa-package -mindepth 1 -maxdepth 1 -type d)
+          "$package/bin/linux-security-audit" version
+          "$package/bin/linux-security-audit" list-checks
+          cp scripts/smoke.sh "$package/smoke-source"
+          mkdir "$package/scripts"
+          mv "$package/smoke-source" "$package/scripts/smoke.sh"
+          bash "$package/scripts/smoke.sh"
+  package:
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - run: make build
+      - name: Smoke-test the exact archive that will be uploaded
+        shell: bash
+        run: |
+          (cd dist && sha256sum --check SHA256SUMS)
+          mkdir -p "$RUNNER_TEMP/lsa-upload"
+          tar -xzf dist/*.tar.gz -C "$RUNNER_TEMP/lsa-upload"
+          package=$(find "$RUNNER_TEMP/lsa-upload" -mindepth 1 -maxdepth 1 -type d)
+          mkdir "$package/scripts"
+          cp scripts/smoke.sh "$package/scripts/smoke.sh"
+          bash "$package/scripts/smoke.sh"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: distributions
+          path: dist/
+          retention-days: 14
+          if-no-files-found: error
