@@ -20,3 +20,11 @@ assert len(report["findings"]) == 4
 assert report["summary"] == {"info": 4, "warning": 0, "critical": 0}
 assert any(item["message"] == "Detected Fixture Linux." for item in report["findings"])
 CHECK
+
+status=0
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/does-not-exist" \
+  "$project_dir/bin/linux-security-audit" audit --check system \
+    --output "$fixture_dir/missing/report.json" > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+[[ ! -s "$fixture_dir/stdout" ]]
+grep -q '^error: output directory is not writable:' "$fixture_dir/stderr"

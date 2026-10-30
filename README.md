@@ -80,7 +80,7 @@ Available options:
 | Option | Description |
 |---|---|
 | `--format text\|json` | Select report format; default is `text` |
-| `--output PATH` | Write the report atomically with mode `0600` |
+| `--output PATH` | Validate the destination before collecting findings and write the report atomically with mode `0600` |
 | `--severity info\|warning\|critical` | Set the minimum displayed severity |
 | `--check NAME` | Run only a named check; repeatable |
 | `--exclude NAME` | Exclude a named check; repeatable |

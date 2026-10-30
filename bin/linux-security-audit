@@ -56,6 +56,9 @@ main() {
         printf 'error: %s\n' "$CLI_ERROR" >&2
         return 3
       fi
+      if [[ -n "$CLI_OUTPUT" ]]; then
+        validate_output_path "$CLI_OUTPUT" || return 3
+      fi
       run_audit
       audit_status="$(finding_exit_code)"
       case "$CLI_FORMAT" in
