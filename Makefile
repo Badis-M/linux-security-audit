@@ -8,7 +8,7 @@ help:
 	@echo "Available targets: syntax lint test smoke ci build"
 
 syntax:
-	bash -n $(BASH_SOURCES) $(TEST_SOURCES)
+	@set -e; for file in $(BASH_SOURCES); do bash -n "$$file"; done
 
 lint:
 	shellcheck --exclude=SC1091,SC2034 $(BASH_SOURCES) $(TEST_SOURCES)
