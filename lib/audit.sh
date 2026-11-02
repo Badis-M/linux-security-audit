@@ -33,7 +33,13 @@ validate_check_selection() {
       return 3
     fi
   done
-  return 0
+  for check_name in "${REGISTERED_CHECKS[@]}"; do
+    if check_is_selected "$check_name"; then
+      return 0
+    fi
+  done
+  CLI_ERROR="At least one check must be selected."
+  return 3
 }
 
 check_is_selected() {

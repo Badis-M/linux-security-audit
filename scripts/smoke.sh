@@ -28,3 +28,12 @@ PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/does-not-exist" \
 [[ "$status" -eq 3 ]]
 [[ ! -s "$fixture_dir/stdout" ]]
 grep -q '^error: output directory is not writable:' "$fixture_dir/stderr"
+
+status=0
+"$project_dir/bin/linux-security-audit" audit \
+  --exclude system --exclude services --exclude network --exclude ssh \
+  --exclude firewall --exclude permissions --exclude resources --exclude updates \
+  > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+[[ ! -s "$fixture_dir/stdout" ]]
+grep -q '^error: At least one check must be selected' "$fixture_dir/stderr"
