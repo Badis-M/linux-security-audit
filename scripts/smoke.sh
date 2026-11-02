@@ -37,3 +37,8 @@ status=0
 [[ "$status" -eq 3 ]]
 [[ ! -s "$fixture_dir/stdout" ]]
 grep -q '^error: At least one check must be selected' "$fixture_dir/stderr"
+
+printf 'PRETTY_NAME="Fixture without newline"' > "$fixture_dir/root/etc/os-release"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q 'Detected Fixture without newline' "$fixture_dir/text"

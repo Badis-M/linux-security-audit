@@ -80,7 +80,7 @@ read_key_value_file() {
   local key value
 
   [[ -r "$file" ]] || return 1
-  while IFS='=' read -r key value; do
+  while IFS='=' read -r key value || [[ -n "$key" ]]; do
     if [[ "$key" == "$requested_key" ]]; then
       value="${value#\"}"
       value="${value%\"}"
