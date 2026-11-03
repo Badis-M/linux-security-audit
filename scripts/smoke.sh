@@ -42,3 +42,8 @@ printf 'PRETTY_NAME="Fixture without newline"' > "$fixture_dir/root/etc/os-relea
 PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
   "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
 grep -q 'Detected Fixture without newline' "$fixture_dir/text"
+
+printf '0008.00 0.00\n' > "$fixture_dir/root/proc/uptime"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q '0d 0h 0m' "$fixture_dir/text"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 format_uptime_seconds() {
-  local total_seconds="$1"
+  local total_seconds=$((10#$1))
   local days hours minutes
   days=$((total_seconds / 86400))
   hours=$(((total_seconds % 86400) / 3600))
