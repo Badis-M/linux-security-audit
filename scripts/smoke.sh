@@ -47,3 +47,8 @@ printf '0008.00 0.00\n' > "$fixture_dir/root/proc/uptime"
 PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
   "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
 grep -q '0d 0h 0m' "$fixture_dir/text"
+
+printf '#!/usr/bin/env bash\nprintf "unexpected diagnostic with extra words here\\n"\n' > "$fixture_dir/bin/ss"
+chmod 700 "$fixture_dir/bin/ss"
+PATH="$fixture_dir/bin:$PATH" "$project_dir/bin/linux-security-audit" audit --check network > "$fixture_dir/text"
+grep -q 'No listening TCP or UDP sockets' "$fixture_dir/text"
