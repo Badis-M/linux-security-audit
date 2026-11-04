@@ -52,3 +52,10 @@ printf '#!/usr/bin/env bash\nprintf "unexpected diagnostic with extra words here
 chmod 700 "$fixture_dir/bin/ss"
 PATH="$fixture_dir/bin:$PATH" "$project_dir/bin/linux-security-audit" audit --check network > "$fixture_dir/text"
 grep -q 'No listening TCP or UDP sockets' "$fixture_dir/text"
+
+printf 'ID=debian\n' > "$fixture_dir/root/etc/os-release"
+printf '#!/usr/bin/env bash\nprintf "Listing...\\nwarning at /tmp/example\\n"\n' > "$fixture_dir/bin/apt"
+chmod 700 "$fixture_dir/bin/apt"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check updates > "$fixture_dir/text"
+grep -q 'No package updates reported' "$fixture_dir/text"
