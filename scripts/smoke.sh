@@ -59,3 +59,9 @@ chmod 700 "$fixture_dir/bin/apt"
 PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
   "$project_dir/bin/linux-security-audit" audit --check updates > "$fixture_dir/text"
 grep -q 'No package updates reported' "$fixture_dir/text"
+
+status=0
+"$project_dir/bin/linux-security-audit" audit --check system \
+  --output "$fixture_dir/"$'report\033.json' > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+grep -q '^error: output path contains control characters' "$fixture_dir/stderr"
