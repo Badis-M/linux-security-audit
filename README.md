@@ -3,9 +3,22 @@
 [![CI](https://github.com/Badis-M/linux-security-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/Badis-M/linux-security-audit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-`linux-security-audit` is a read-only Bash CLI that inspects the security and
-operational posture of Ubuntu and Debian hosts. It produces actionable text or
-JSON findings without changing the audited system.
+## 30-second pitch
+
+Linux Security Audit helps operators understand the security posture of an
+Ubuntu or Debian host before deciding what to investigate. Run the Bash CLI to
+review failed services, exposed sockets, SSH settings, firewall status, file
+permissions, resource pressure, and pending updates. It returns text for manual
+review or JSON for automation. The audit collects evidence without modifying
+the host, and its findings point to concrete follow-up checks.
+
+## Overview
+
+Select the checks you need or run the full inventory. Each finding has an
+information, warning, or critical severity. The display threshold filters the
+finding list while the summary and exit code still reflect the full audit.
+Results depend on the local tools, permissions, and data available to the
+collectors. Package findings use existing APT metadata, which may be stale.
 
 ## Features
 
