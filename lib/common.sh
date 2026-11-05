@@ -18,6 +18,7 @@ sanitize_text() {
     printf -v character '%b' "\\$(printf '%03o' "$code")"
     value="${value//"$character"/ }"
   done
+  value="${value//$'\177'/ }"
   printf '%s' "$value"
 }
 

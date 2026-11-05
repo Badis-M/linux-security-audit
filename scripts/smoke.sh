@@ -65,3 +65,8 @@ status=0
   --output "$fixture_dir/"$'report\033.json' > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
 [[ "$status" -eq 3 ]]
 grep -q '^error: output path contains control characters' "$fixture_dir/stderr"
+
+printf 'PRETTY_NAME="Fixture\177Linux"\n' > "$fixture_dir/root/etc/os-release"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q 'Detected Fixture Linux' "$fixture_dir/text"
