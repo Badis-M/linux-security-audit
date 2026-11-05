@@ -20,3 +20,53 @@ assert len(report["findings"]) == 4
 assert report["summary"] == {"info": 4, "warning": 0, "critical": 0}
 assert any(item["message"] == "Detected Fixture Linux." for item in report["findings"])
 CHECK
+
+status=0
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/does-not-exist" \
+  "$project_dir/bin/linux-security-audit" audit --check system \
+    --output "$fixture_dir/missing/report.json" > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+[[ ! -s "$fixture_dir/stdout" ]]
+grep -q '^error: output directory is not writable:' "$fixture_dir/stderr"
+
+status=0
+"$project_dir/bin/linux-security-audit" audit \
+  --exclude system --exclude services --exclude network --exclude ssh \
+  --exclude firewall --exclude permissions --exclude resources --exclude updates \
+  > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+[[ ! -s "$fixture_dir/stdout" ]]
+grep -q '^error: At least one check must be selected' "$fixture_dir/stderr"
+
+printf 'PRETTY_NAME="Fixture without newline"' > "$fixture_dir/root/etc/os-release"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q 'Detected Fixture without newline' "$fixture_dir/text"
+
+printf '0008.00 0.00\n' > "$fixture_dir/root/proc/uptime"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q '0d 0h 0m' "$fixture_dir/text"
+
+printf '#!/usr/bin/env bash\nprintf "unexpected diagnostic with extra words here\\n"\n' > "$fixture_dir/bin/ss"
+chmod 700 "$fixture_dir/bin/ss"
+PATH="$fixture_dir/bin:$PATH" "$project_dir/bin/linux-security-audit" audit --check network > "$fixture_dir/text"
+grep -q 'No listening TCP or UDP sockets' "$fixture_dir/text"
+
+printf 'ID=debian\n' > "$fixture_dir/root/etc/os-release"
+printf '#!/usr/bin/env bash\nprintf "Listing...\\nwarning at /tmp/example\\n"\n' > "$fixture_dir/bin/apt"
+chmod 700 "$fixture_dir/bin/apt"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check updates > "$fixture_dir/text"
+grep -q 'No package updates reported' "$fixture_dir/text"
+
+status=0
+"$project_dir/bin/linux-security-audit" audit --check system \
+  --output "$fixture_dir/"$'report\033.json' > "$fixture_dir/stdout" 2> "$fixture_dir/stderr" || status=$?
+[[ "$status" -eq 3 ]]
+grep -q '^error: output path contains control characters' "$fixture_dir/stderr"
+
+printf 'PRETTY_NAME="Fixture\177Linux"\n' > "$fixture_dir/root/etc/os-release"
+PATH="$fixture_dir/bin:$PATH" LSA_ROOT_DIR="$fixture_dir/root" \
+  "$project_dir/bin/linux-security-audit" audit --check system > "$fixture_dir/text"
+grep -q 'Detected Fixture Linux' "$fixture_dir/text"

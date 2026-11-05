@@ -115,12 +115,11 @@ validate_output_path() {
     printf 'error: invalid output path\n' >&2
     return 3
   fi
-  case "$output_path" in
-    *$'\n'*|*$'\r'*|*$'\t'*)
-      printf 'error: output path contains control characters\n' >&2
-      return 3
-      ;;
-  esac
+  local LC_ALL=C
+  if [[ "$output_path" == *[[:cntrl:]]* ]]; then
+    printf 'error: output path contains control characters\n' >&2
+    return 3
+  fi
   if [[ -L "$output_path" ]]; then
     printf 'error: output path must not be a symbolic link: %s\n' "$output_path" >&2
     return 3

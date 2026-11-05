@@ -28,3 +28,5 @@ The new package versions are prepared locally, not published. No Git staging, co
 - Local verification: Échec SC2317 reproduit avec ShellCheck 0.10 sur les anciens tests, puis disparition après correction. Lint réussi avec ShellCheck 0.10 et 0.11 ; make ci build réussi avec Bash 5.2.37, Bats 1.14.0 et ShellCheck 0.10 dans une copie temporaire macOS : 75 tests, smoke synthétique et construction de l’archive. ShellCheck 0.9 et les deux conteneurs Linux n’ont pas été exécutés localement.
 - Scope: only CI command compatibility or test-linter annotations changed. Runtime behavior, package versions, lock files and release authorization remain unchanged.
 - Pending: the corrected revision has not run on GitHub. No commit, push, tag, release or workflow dispatch was performed by the agent during this follow-up.
+
+The syntax target checks each Bash script independently. Bats test files are checked by the Bats runner.

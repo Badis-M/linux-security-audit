@@ -12,9 +12,8 @@ report_available_updates() {
   local apt_output="$1"
   local line update_count=0
   while IFS= read -r line; do
-    [[ -n "$line" || "$line" == Listing* ]] || continue
-    [[ "$line" == Listing* ]] && continue
-    [[ "$line" == */* ]] || continue
+    # An upgrade row starts with the package name and archive, without spaces.
+    [[ "$line" =~ ^[a-z0-9][a-z0-9.+-]*/[^[:space:]]+[[:space:]] ]] || continue
     ((update_count += 1))
   done <<< "$apt_output"
 
