@@ -34,6 +34,22 @@ setup() {
   [ "${FINDING_SEVERITIES[0]}" = "info" ]
 }
 
+@test "compares leading-zero MaxAuthTries above the threshold as decimal" {
+  report_sshd_configuration "maxauthtries 08"
+
+  [ "${FINDING_TITLES[3]}" = "High authentication attempt limit" ]
+  [ "${FINDING_SEVERITIES[3]}" = "warning" ]
+  [ "$(count_findings_by_severity warning)" -eq 1 ]
+}
+
+@test "compares leading-zero MaxAuthTries at the threshold as decimal" {
+  report_sshd_configuration "maxauthtries 06"
+
+  [ "${FINDING_TITLES[3]}" = "Authentication attempt limit" ]
+  [ "${FINDING_SEVERITIES[3]}" = "info" ]
+  [ "$(count_findings_by_severity warning)" -eq 0 ]
+}
+
 @test "reports missing evaluated values without inventing failures" {
   report_sshd_configuration ""
 
