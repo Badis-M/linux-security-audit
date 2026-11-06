@@ -83,7 +83,7 @@ report_sshd_configuration() {
   fi
 
   if is_unsigned_integer "$max_auth_tries"; then
-    if (( max_auth_tries > 6 )); then
+    if (( 10#$max_auth_tries > 6 )); then
       add_finding ssh warning "High authentication attempt limit" \
         "MaxAuthTries is set to $max_auth_tries." \
         "Reduce MaxAuthTries to limit repeated authentication attempts."
