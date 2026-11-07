@@ -32,3 +32,27 @@ finding unless the absence itself represents a material security condition.
   metadata qualification.
 
 These thresholds are operational defaults, not compliance assertions.
+
+## Expected TCP listening ports
+
+By default, the network check keeps the wildcard classification above. To
+supply an explicit list of expected TCP ports on network interfaces, use:
+
+```bash
+./bin/linux-security-audit audit --check network \
+  --expected-tcp-port 22 --expected-tcp-port=443
+```
+
+The audit-only option is repeatable and accepts decimal ports from 1 to 65535
+(including leading zeroes). Missing, nonnumeric, or out-of-range values are
+invalid CLI arguments (exit code 3). Each port is compared as a whole number:
+22 does not cover 2222.
+
+With a list, valid non-loopback TCP endpoints are informational when their
+port is listed; otherwise they produce an `Unexpected TCP listening port`
+warning. Unreadable addresses or ports also produce that warning, never a
+match. IPv4 loopback (127.0.0.0/8) and IPv6 loopback remain informational,
+regardless of the list. UDP classification is unchanged.
+
+These findings describe local listening sockets, not Internet reachability.
+Routing, firewalls, and network namespaces require separate investigation.

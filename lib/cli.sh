@@ -13,6 +13,7 @@ reset_cli_options() {
   CLI_ERROR=""
   CLI_ONLY_CHECKS=()
   CLI_EXCLUDED_CHECKS=()
+  CLI_EXPECTED_TCP_PORTS=()
 }
 
 set_cli_error() {
@@ -57,6 +58,33 @@ parse_cli() {
 
   while (( $# > 0 )); do
     case "$1" in
+      --expected-tcp-port|--expected-tcp-port=*)
+        local port_value
+        if [[ "$1" == *=* ]]; then
+          port_value="${1#*=}"
+          shift
+        else
+          if (( $# < 2 )); then
+            set_cli_error "Missing value for --expected-tcp-port."
+            return 3
+          fi
+          port_value="$2"
+          shift 2
+        fi
+        if [[ ! "$port_value" =~ ^[0-9]+$ ]]; then
+          set_cli_error "Invalid TCP port: $port_value"
+          return 3
+        fi
+        # Strip leading zeroes before arithmetic to avoid octal and overflow.
+        while [[ "${#port_value}" -gt 1 && "$port_value" == 0* ]]; do
+          port_value="${port_value#0}"
+        done
+        if (( ${#port_value} > 5 )) || (( 10#$port_value < 1 || 10#$port_value > 65535 )); then
+          set_cli_error "Invalid TCP port: $port_value"
+          return 3
+        fi
+        CLI_EXPECTED_TCP_PORTS+=("$((10#$port_value))")
+        ;;
       --format|--output|--severity|--check|--exclude)
         if (( $# < 2 )) || [[ -z "$2" ]]; then
           set_cli_error "Missing value for $1."
@@ -154,8 +182,12 @@ Audit options:
                                  Display findings at or above this severity
   --check NAME                   Run only this check (repeatable)
   --exclude NAME                 Exclude this check (repeatable)
+  --expected-tcp-port PORT        Expected network TCP port (1-65535; repeatable)
   --no-color                     Disable ANSI colors
   --verbose                      Print execution details to stderr
   -h, --help                     Show this help
+
+Example:
+  linux-security-audit audit --check network --expected-tcp-port 22 --expected-tcp-port=443
 EOF
 }
