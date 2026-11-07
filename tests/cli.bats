@@ -32,6 +32,36 @@ setup() {
   [ "${CLI_EXCLUDED_CHECKS[0]}" = "network" ]
 }
 
+@test "parses repeated expected TCP ports in decimal and resets the list" {
+  parse_cli audit --expected-tcp-port 00022 --expected-tcp-port=443 --expected-tcp-port 65535
+  [ "${CLI_EXPECTED_TCP_PORTS[*]}" = "22 443 65535" ]
+  parse_cli audit
+  [ "${#CLI_EXPECTED_TCP_PORTS[@]}" -eq 0 ]
+}
+
+@test "rejects invalid expected TCP ports with CLI status 3" {
+  local value
+  for value in "" 0 65536 -1 +22 22tcp 1.5 999999999999999999999999; do
+    run parse_cli audit --expected-tcp-port="$value"
+    [ "$status" -eq 3 ]
+    run parse_cli audit --expected-tcp-port "$value"
+    [ "$status" -eq 3 ]
+  done
+  run parse_cli audit --expected-tcp-port
+  [ "$status" -eq 3 ]
+  run parse_cli audit --expected-tcp-port --no-color
+  [ "$status" -eq 3 ]
+}
+
+@test "expected TCP ports are audit-only and accept the lower boundary" {
+  parse_cli audit --expected-tcp-port=1
+  [ "${CLI_EXPECTED_TCP_PORTS[0]}" = 1 ]
+  run parse_cli version --expected-tcp-port 22
+  [ "$status" -eq 3 ]
+  run parse_cli list-checks --expected-tcp-port 22
+  [ "$status" -eq 3 ]
+}
+
 @test "parses output options" {
   parse_cli audit --format json --output report.json --severity warning --no-color --verbose
 
